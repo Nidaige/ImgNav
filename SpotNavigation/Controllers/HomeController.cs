@@ -38,5 +38,38 @@ namespace SpotNavigation.Controllers
         {
             return View(new ErrorViewModel {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier});
         }
+        
+        [HttpPost]
+        public IActionResult UploadImage()
+        {
+            string imgName = "";
+            foreach(var file in Request.Form.Files)
+            {
+                imgName = file.FileName;
+                Draft draft = new Draft();
+                draft.ImageName = file.FileName;
+
+                MemoryStream ms = new MemoryStream();
+                file.CopyTo(ms);
+                draft.ImageData = ms.ToArray();
+
+                ms.Close();
+                ms.Dispose();
+
+                _db.Drafts.Add(draft);
+                _db.SaveChanges();
+                
+
+            }
+            var drafts = _db.Drafts.ToList();
+            var Latest = drafts.First();
+            string imageBase64Data = Convert.ToBase64String(Latest.ImageData);
+            string imageDataURL = string.Format("data:image/jpg;base64,{0}", imageBase64Data);
+            ViewBag.ImageTitle = Latest.ImageName;
+            ViewBag.ImageDataUrl = imageDataURL;
+            return View("Index");
+        }
+    
+        
     }
 }
