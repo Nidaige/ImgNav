@@ -16,6 +16,7 @@ namespace SpotNavigation.Controllers
     {
         private DraftDbContext _db;
         private readonly ILogger<HomeController> _logger;
+        private String DisplayCanvas;
 
         public HomeController(ILogger<HomeController> logger, DraftDbContext db)
         {
@@ -25,6 +26,8 @@ namespace SpotNavigation.Controllers
 
         public IActionResult Index()
         {
+            ViewBag.DisplayCanvas = "none";
+            ViewBag.DisplayForm = "block";
             return View();
         }
 
@@ -48,7 +51,6 @@ namespace SpotNavigation.Controllers
                 imgName = file.FileName;
                 Draft draft = new Draft();
                 draft.ImageName = file.FileName;
-
                 MemoryStream ms = new MemoryStream();
                 file.CopyTo(ms);
                 draft.ImageData = ms.ToArray();
@@ -58,15 +60,16 @@ namespace SpotNavigation.Controllers
 
                 _db.Drafts.Add(draft);
                 _db.SaveChanges();
-                
-
             }
             var drafts = _db.Drafts.ToList();
-            var Latest = drafts.First();
+            var Latest = drafts.Last();
             string imageBase64Data = Convert.ToBase64String(Latest.ImageData);
             string imageDataURL = string.Format("data:image/jpg;base64,{0}", imageBase64Data);
             ViewBag.ImageTitle = Latest.ImageName;
             ViewBag.ImageDataUrl = imageDataURL;
+            ViewBag.DisplayCanvas = "flex";
+            ViewBag.DisplayForm = "none";
+
             return View("Index");
         }
     

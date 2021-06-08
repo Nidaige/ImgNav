@@ -1,14 +1,75 @@
-﻿@{
+﻿@using Microsoft.EntityFrameworkCore.Metadata.Internal
+@{
     ViewData["Title"] = "Home Page";
 }
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-<script>$(document).ready(function() {
-            $("img").on("click", function(event) {
-                var x = event.pageX - this.offsetLeft;
-                var y = event.pageY - this.offsetTop;
-                alert("X Coordinate: " + x + " Y Coordinate: " + y);
+<script>
+var state = false;
+var startx = 0;
+var starty = 0;
+var endx = 0;
+var endy = 0;
+var coords = new Uint8Array();
+$(document).ready(function() {
+    var cnvs = document.getElementById("displayedCanvas");
+            $("canvas").on("click", function(event) {
+                var x = event.pageX - cnvs.offsetLeft;
+                var y = event.pageY - cnvs.offsetTop;
+                Draw(x, y,cnvs);
+                });
             });
-        });</script>
+window.onload = function() {
+    var canvas = document.getElementById("displayedCanvas");
+    var img = document.getElementById("displayedImage");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    img.style.display = "none";
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage(img,img.style.width, img.style.height);
+    var imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
+    document.getElementById("imgArray").innerHTML = imgData.data;
+    var data = imgData.data;
+    var rows = [];
+    var currentrow = [];
+    // Loop through data (serialized pixel RGBA-balues, so 4x pixel count elements), at every 4th element (each pixel)
+    for(var it=0; it<data.length; it+=4) {
+        // Add current pixel to current row
+        currentrow.push(new Uint8ClampedArray( [ data [ it ] ,data [ it + 1 ] ,data [ it + 2 ] ,data [ it + 3 ] ]));
+        console.log("Iterator: "+it);
+        // If Current pixel is at the end of a row, add current row to list of rows and empty current row.      
+        if (currentrow.length === canvas.width)
+        {
+        rows.push(currentrow);
+        currentrow = [];
+        }
+            }
+};
+
+
+function Draw(iX,iY,canvas){
+var ctx = canvas.getContext("2d");
+
+ctx.beginPath();
+ctx.arc(iX-1.5, iY-1.5, 3, 0, 2 * Math.PI, false);
+ctx.lineWidth = 3;
+ctx.fillStyle="Red";
+ctx.fill();
+console.log(iX+","+iY);
+if (!state){
+    startx=iX;
+    starty=iY;
+    state = true;
+}
+else {
+    endx = iX;
+    endy = iX;
+}
+
+//
+
+}
+
+</script>
 
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
@@ -25,31 +86,14 @@
 <form asp-action="UploadImage" 
       asp-controller="Home" 
       method="post" 
-      enctype="multipart/form-data">
+      enctype="multipart/form-data" style="display:@ViewBag.DisplayForm;">
     <input type="file" id="file1" 
-           name="file1" 
-           multiple="multiple" />
+           name="file1"/>
     <button type="submit">Upload File(s)</button>
 </form>
-
-
-<div>@ViewBag.ImageTitle</div>
-<img src=@ViewBag.ImageDataUrl ismap>
-
-<script>
-document.getElementById(imageid).addEventListener('click', function (event) {
-    // https://stackoverflow.com/a/288731/1497139
-    bounds=this.getBoundingClientRect();
-    var left=bounds.left;
-    var top=bounds.top;
-    var x = event.pageX - left;
-    var y = event.pageY - top;
-    var cw=this.clientWidth
-    var ch=this.clientHeight
-    var iw=this.naturalWidth
-    var ih=this.naturalHeight
-    var px=x/cw*iw
-    var py=y/ch*ih
-    alert("click on "+this.tagName+" at pixel ("+px+","+py+") mouse pos ("+x+"," + y+ ") relative to boundingClientRect at ("+left+","+top+") client image size: "+cw+" x "+ch+" natural image size: "+iw+" x "+ih );
-  });
-</script>
+<div style="overflow:auto">
+    <div>@ViewBag.ImageTitle</div>
+    <img id="displayedImage" src=@ViewBag.ImageDataUrl  style="display:block">
+    <canvas id="displayedCanvas" ></canvas>
+</div>
+<div id="imgArray"></div>
