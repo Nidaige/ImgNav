@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SpotNavigation.Data;
@@ -64,13 +65,20 @@ namespace SpotNavigation.Controllers
             var drafts = _db.Drafts.ToList();
             var Latest = drafts.Last();
             string imageBase64Data = Convert.ToBase64String(Latest.ImageData);
-            string imageDataURL = string.Format("data:image/jpg;base64,{0}", imageBase64Data);
+            string imageDataURL = string.Format("data:image/png;base64,{0}", imageBase64Data);
             ViewBag.ImageTitle = Latest.ImageName;
             ViewBag.ImageDataUrl = imageDataURL;
             ViewBag.DisplayCanvas = "flex";
             ViewBag.DisplayForm = "none";
 
             return View("Index");
+        }
+        
+        [HttpPost]
+        public IActionResult SendSolution(Solution solutionString)
+        {
+            //@ViewBag.SolutionString = solutionString;
+            return View(solutionString);
         }
     
         
