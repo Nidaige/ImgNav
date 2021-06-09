@@ -29,6 +29,7 @@ namespace SpotNavigation.Controllers
         {
             ViewBag.DisplayCanvas = "none";
             ViewBag.DisplayForm = "block";
+            ViewBag.BtnVis = "none";
             return View();
         }
 
@@ -58,7 +59,13 @@ namespace SpotNavigation.Controllers
 
                 ms.Close();
                 ms.Dispose();
-
+                var drafts2 = _db.Drafts.ToList();
+                if (drafts2.Count!=0)
+                {
+                    var Latest2 = drafts2.Last();
+                    _db.Remove(Latest2);
+                    _db.SaveChanges();
+                }
                 _db.Drafts.Add(draft);
                 _db.SaveChanges();
             }
@@ -70,6 +77,7 @@ namespace SpotNavigation.Controllers
             ViewBag.ImageDataUrl = imageDataURL;
             ViewBag.DisplayCanvas = "flex";
             ViewBag.DisplayForm = "none";
+            ViewBag.BtnVis = "inline";
 
             return View("Index");
         }

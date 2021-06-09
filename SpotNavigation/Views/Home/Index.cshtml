@@ -5,21 +5,42 @@
 }
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script>
-var state = false;
-var startx = 83;
-var starty = 433;
-var endx = 1211;
-var endy = 167;
+var state = 0;
+var startx = 0;
+var starty = 0;
+var endx = 0;
+var endy = 0;
+var inActiveButtonColor = "#EFEFEF";
+var startSet = false;
+var endSet = false;
 console.log("Predefined start: "+startx+", "+starty+", Predefined end: "+endx+", "+endy);
 var coords = [];
 var solution = [];
 var solution2 = "";
+var dotColor = "black";
 $(document).ready(function() {
     var cnvs = document.getElementById("displayedCanvas");
+    document.getElementById("SetStartButton").style.background = "orange";
             $("canvas").on("click", function(event) {
                 var x = event.pageX - cnvs.offsetLeft;
                 var y = event.pageY - cnvs.offsetTop;
-                Draw(x, y,cnvs,"Red", 3);
+                if (state === 0){
+                    startx = x;
+                    starty = y;
+                    coords[starty][startx]='S';
+                    dotColor = "orange";
+                    startSet = true;
+                }
+                else if (state === 1) {
+                    endx = x;
+                    endy = y;
+                    coords[endy][endx]='E';
+                    dotColor = "lightblue";
+                    endSet = true;
+                }
+                console.log("start: "+startx+", "+starty+", end: "+endx+", "+endy);
+
+                Draw(x, y,cnvs,dotColor, 3);
                 });
             });
 window.onload = function() {
@@ -52,8 +73,6 @@ window.onload = function() {
         currentrow = [];
         }
             }
-    rows[starty][startx]='S';
-    rows[endy][endx]='E';
     //console.log(rows);
     coords = rows;
 };
@@ -63,7 +82,7 @@ function Draw(iX,iY,canvas,color, linwid){
 var ctx = canvas.getContext("2d");
 
 ctx.beginPath();
-ctx.arc(iX-1.5, iY-1.5, 3, 0, 2 * Math.PI, false);
+ctx.arc(iX-1.5, iY-1.5, linwid, 0, 2 * Math.PI, false);
 ctx.lineWidth = linwid;
 ctx.fillStyle=color;
 ctx.fill();
@@ -84,8 +103,6 @@ function mazeSolver() {
     var start = findStartEnd(maze,'S');
     var end = findStartEnd(maze,'E');
     console.log("Start: "+start+", end: "+end);
-    Draw(start[1],start[0],document.getElementById("displayedCanvas"),"Blue",3);
-    Draw(end[1],end[0],document.getElementById("displayedCanvas"),"Orange",3);
     
     fillMaze(maze, start);
    
@@ -223,12 +240,34 @@ function fillMaze(maze, start) {
     }
 
 }
-</script>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+function setState(newState){
+    var setStartButton = document.getElementById("SetStartButton");
+    var setEndButton = document.getElementById("SetEndButton");
+    state = newState;
+    if (state === 1){
+        setEndButton.style.background = "lightblue";
+        setStartButton.style.background = inActiveButtonColor;    }
+    else {
+        setStartButton.style.background = "orange";
+        setEndButton.style.background = inActiveButtonColor;
+    }
+    
+}
+
+function pathFinder (){
+    if (startSet && endSet){
+        mazeSolver();
+    }
+    else{
+        alert("You need to set both the start and end point!");
+    }
+}
+</script>
+<h1 class="display-4">Navigation and coordinates for SPOT</h1>
+    <h2>Images should not be greater than 4000x2800 pixels, and should be in the .png format</h2>
+    <h2>The web-app uses the color white within images as "pathable" ground, so the drafts should do so as well</h2>
+    <h3>Draft lines that denote measurements etc. can obstruct the app's performance</h3>
 <h1 id="PathStatus"></h1>
 <form asp-action="UploadImage" 
       asp-controller="Home" 
@@ -238,13 +277,19 @@ function fillMaze(maze, start) {
            name="file1"/>
     <button type="submit">Upload File(s)</button>
 </form>
-<div>@ViewBag.ImageTitle</div>
+
+<input id ="SetStartButton" type="button" value="Set Start" onclick= setState(0) style="display:@ViewBag.BtnVis">
+<input id ="SetEndButton" type="button" value="Set End" onclick= setState(1) style="display:@ViewBag.BtnVis">
+
+<div>Image title: @ViewBag.ImageTitle</div>
     <img id="displayedImage" src=@ViewBag.ImageDataUrl  style="display:block">
     <canvas id="displayedCanvas" ></canvas>
 <div id="imgArray" style="display:none"></div>
 
 
-<input id ="mazebutton" type="button" value="Solve" onclick= mazeSolver()>
+
+
+<input id ="mazebutton" type="button" value="Solve" onclick= pathFinder() style="display:@ViewBag.BtnVis">
 
 <form asp-controller="Home" asp-action="SendSolution" method="post" id="SendSolutionForm" style="display:none">
     <div class="form-group">
