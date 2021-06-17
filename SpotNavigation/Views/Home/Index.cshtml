@@ -62,7 +62,7 @@ window.onload = function() {
         //currentrow.push(new Uint8ClampedArray( [ data [ it ] ,data [ it + 1 ] ,data [ it + 2 ] ,data [ it + 3 ] ]));
         // This version only adds the sum of the pixel values, so black is 0 and white is 255
         var value = (data [ it ] + data [ it + 1 ] + data [ it + 2 ])/3;
-        if (value!=255){value = 'X';} else{value = ' ';}
+        if (value==255){value = ' ';} else{value = 'X';}
    
         currentrow.push(value)
         //console.log("Iterator: "+it);
@@ -166,6 +166,10 @@ function followSolution(maze, end) {
     
     }
     solution2+="[";
+    for (var a = 0; a<solution.length; a++){
+        solution[a][0]-=startx;
+        solution[a][1]-=starty;
+    }
     solution2 += solution.reverse().join("], [");
     solution2+="]";
 }
