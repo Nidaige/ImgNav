@@ -85,8 +85,29 @@ namespace SpotNavigation.Controllers
         [HttpPost]
         public IActionResult SendSolution(Solution solutionString)
         {
+            var Paths = _db.Paths.ToList();
+            if (Paths.Count != 0)
+            {
+                _db.Remove(Paths.Last());
+            }
+
+            _db.Paths.Add(solutionString);
+            _db.SaveChanges();
             //@ViewBag.SolutionString = solutionString;
             return View(solutionString);
+        }
+
+        [HttpGet]
+        public IActionResult SendSolution()
+        {
+            Solution returnPath = new Solution();
+            returnPath.SolString = "No solution in database";
+            var Paths = _db.Paths.ToList();
+            if (Paths.Count != 0)
+            {
+                returnPath.SolString = Paths.First().SolString;
+            }
+            return View(returnPath);
         }
     
         

@@ -13,6 +13,7 @@ namespace SpotNavigation.Data
 
         // Each DB set maps to a table in the database
         public DbSet<Draft> Drafts { get; set; }
+        public DbSet<Solution> Paths { get; set; }
         
     }
 }
