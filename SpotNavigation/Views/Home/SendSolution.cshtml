@@ -3,39 +3,8 @@
     ViewData["Title"] = "Solution steps";
     Layout = null;
 }
-<script type="text/javascript" src="https://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
-<script>
-var ros = new ROSLIB.Ros({
-    url : 'ws://localhost:9090'
-  });
-
-ros.on('connection', function() {
-    console.log('Connected to websocket server.');
-    document.getElementById("Connect").innerText = "Connected";
-    document.getElementById("Connect").style.color = "Green";
-    var cmdNav = new ROSLIB.Topic({
-        ros : ros,
-        name : '/nav',
-        messageType : 'std_msgs/String.msg'
-    })
-    var text = new ROSLIB.Message({
-        data: document.getElementById("solutionSteps").innerText
-    })   
-    cmdNav.publish(text)
-});
-ros.on('error', function(error) {
-       console.log('Error connecting to websocket server: ', error);
-       document.getElementById("Connect").innerText = "Failed";
-       document.getElementById("Connect").style.color = "Red";
-   });
-   
- ros.on('close', function() {
-       console.log('Connection to websocket server closed.');
-   });
-
-</script>
 <div id="solutionSteps">
     @Html.DisplayFor(solutionItem => Model.SolString)
 </div>
-<h1 id="Connect"></h1>
+
 
