@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 using SpotNavigation.Data;
 using SpotNavigation.Models;
@@ -47,16 +48,30 @@ namespace SpotNavigation.Controllers
         [HttpPost]
         public IActionResult UploadImage()
         {
-            string imgName = "";
-            foreach(var file in Request.Form.Files)
+            foreach (var file in Request.Form.Files)
             {
-                imgName = file.FileName;
                 Draft draft = new Draft();
                 draft.ImageName = file.FileName;
                 MemoryStream ms = new MemoryStream();
-                file.CopyTo(ms);
+                string fileExtension = file.FileName.Substring(file.FileName.Length - 3, 3);
+                if (fileExtension == "pdf") // If file has pdf extension, convert it to png filestream
+                {
+                    MemoryStream imageStream = new MemoryStream();
+                    file.CopyTo(imageStream);
+                    var pdf = new Aspose.Pdf.Document(imageStream);
+                    ms = new Aspose.Pdf.Document(imageStream).ConvertPageToPNGMemoryStream(pdf.Pages[1]);
+                }
+                else if (fileExtension == "png" // if it has extension png, just copy to stream
+                )
+                {
+                    file.CopyTo(ms);
+                }
+                else // Not a supported format, return nothing
+                {
+                    return View("Index");
+                    
+                }
                 draft.ImageData = ms.ToArray();
-
                 ms.Close();
                 ms.Dispose();
                 var drafts2 = _db.Drafts.ToList();
@@ -78,7 +93,6 @@ namespace SpotNavigation.Controllers
             ViewBag.DisplayCanvas = "flex";
             ViewBag.DisplayForm = "none";
             ViewBag.BtnVis = "inline";
-
             return View("Index");
         }
         
@@ -109,7 +123,7 @@ namespace SpotNavigation.Controllers
             }
             return View(returnPath);
         }
-    
-        
+
+
     }
 }

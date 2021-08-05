@@ -170,7 +170,46 @@ function followSolution(maze, end) {
         solution[a][0]-=startx;
         solution[a][1]-=starty;
     }
-    solution2 += solution.reverse().join("], [");
+    // Reverse solution to get steps in order from start to finish
+    solution = solution.reverse();
+    // Trim coordinates in solution down to only the points where it changes direction
+    // Algorithm steps:
+    /* 
+    *   1. Store current direction of travel in a variable
+    *   2. Look at element at index 1 (2nd point in list), determine which coordinate matches the previous point.
+    *   3. Iterate through list of points, and see if the matching coordinate is the same or different.
+    *   4a If they are the same, direction of travel is the same
+    *   4b If they are different, the previous point was a corner and gets added to the buffer
+    *   5. Once the end of the list of coordinates is found, add the final point from the list to the end of the buffer
+    *   6. Buffer should only contain corners
+    * */
+    var direction = 0;
+    var buffer = [];
+    buffer.push(solution[0]);
+    // Compare X of start and 1st point
+    if (solution[1][0]===solution[0][0]){
+        // X is the same, do nothing
+    }
+    // Compare Y
+    else if(solution[1][1]===solution[0][1]) {
+        // Y is the same, set direction to 1
+        direction = 1;
+    }
+    // Iterate through points starting at the next point (2nd point after start) to check against previous
+    for (var it=2; it<solution.length;it++){
+           // If coordinate in "current direction" is the same, do nothing
+        if (solution[it][direction] === solution[it-1][direction]){
+            // Do nothing :-)    
+        }
+            // If coordinate in the "other direction" is the same, change direction, add previous point to buffer.
+        else if (solution[it][1-direction] === solution[it-1][1-direction]){
+           buffer.push(solution[it-1]);  // Add previous point to buffer
+           direction = 1-direction;     // Swap direction 
+        }
+    }
+    // At this point, buffer should contain the turning points. Let's add the end point, and then turn it into a string.
+    buffer.push(solution[solution.length-1]);   
+    solution2 += buffer.join("], [");
     solution2+="]";
 }
 
