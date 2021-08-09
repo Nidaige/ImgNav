@@ -1,0 +1,6 @@
+<launch>
+    
+    <node name="spot_ros_interface_py" pkg="spot_mil" type="spot_wrapper.py" output="screen" args="--username user --password 0hucscziz28r 192.168.80.3"/>
+    <node name="web_controller" pkg="spot_mil" type="web_controller.py" output="screen"/>
+
+</launch>
