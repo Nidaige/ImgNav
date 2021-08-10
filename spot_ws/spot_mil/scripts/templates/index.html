@@ -54,10 +54,10 @@ function submitImage() {
     canvas.height = img.height;
     var ctx = canvas.getContext("2d");
     ctx.drawImage(img,img.style.width, img.style.height);
-    img.style.display = "none";
     canvas.style.display="block";
     console.log("width:"+canvas.width+", height:"+canvas.height);
     var imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
+    img.style.display = "none";
     document.getElementById("imgArray").innerHTML = imgData.data;
     var data = imgData.data;
     var rows = [];
@@ -137,9 +137,11 @@ function mazeSolver() {
     console.log(solution2);
     var path = document.getElementById("PathStatus");
     var SolveForm = document.getElementById("SendSolutionForm");
+    var SolutionField = document.getElementById("SolString");
     if (solution2.length>2){
         path.innerText="path found!";
         SolveForm.style.display="block";
+        SolutionField.value=solution2;
     } else {
         path.innerText="No path :c";
         SolveForm.style.display="none";
@@ -330,6 +332,7 @@ function pathFinder (){
     }
 }
 </script>
+
 <h1 class="display-4">Navigation and coordinates for SPOT</h1>
     <h2>Images should not be greater than 4000x2800 pixels, and should be in the .png format</h2>
     <h2>The web-app uses the color white within images as "pathable" ground, so the drafts should do so as well</h2>
@@ -350,15 +353,14 @@ function pathFinder (){
 
 <input id ="mazebutton" type="button" value="Solve" onclick= pathFinder() >
 
-<form asp-controller="Home" asp-action="SendSolution" method="post" id="SendSolutionForm" style="display:none">
-    <div class="form-group">
-        <label asp-for="SolString" style="display:none"></label>
-        <input asp-for="SolString" style="display:none">
-    </div>
-    <div class="form-group">
-         <input type="submit" value="Send Solution" style="background:lightgreen">
+
+<div class='container'>
+        <form method="post" id="SendSolutionForm">
+            <input type="text" name="path" style="display:none" id="SolString" ></input>
+            <button type="submit">Send Solution</button></a>
+        </form>
+</div>
       </div>
-</form>
   </div>
   <div id="Live">
     <h1>Spot Live</h1>

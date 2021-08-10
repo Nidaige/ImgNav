@@ -11,8 +11,11 @@ from sensor_msgs.msg import Image
 import threading
 from flask import Flask, render_template, Response, request
 import time
+import std_msgs
 
 # Start ROS node in seperate thread
+from werkzeug.utils import redirect
+
 threading.Thread(target=lambda: rospy.init_node('web_controller', disable_signals=True)).start()
 
 # Create a Flask Controller App
@@ -40,15 +43,23 @@ sub_markers = rospy.Subscriber("spot_image", Image, rosImage.callback)
 
 
 # Route creations
-@app.route('/')
+@app.route('/', methods=['GET','POST'])
 def index():
-    """Home page."""
-    return render_template('index.html')
+    if (request.method=='GET'):
+        """Home page."""
+        return render_template('index.html')
+    elif request.method=='POST':
+        pub = rospy.Publisher('spot_coordinates', std_msgs.msg.String, queue_size=10)
+        pub.publish(std_msgs.msg.String(request.form['path']))
+        return redirect('/')
+
 
 @app.route('/video_feed', methods=['GET','POST'])
 def video_feed():
     """Video streaming route."""
     return Response(rosImage.gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
 
 
 
